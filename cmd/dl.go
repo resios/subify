@@ -1,6 +1,10 @@
 package cmd
 
 import (
+	"log"
+	"mime"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/matcornic/subify/common/utils"
@@ -29,9 +33,47 @@ Give the path of your video as first parameter and let's go !`,
 
 		apis := strings.Split(viper.GetString("download.apis"), ",")
 		languages := strings.Split(viper.GetString("download.languages"), ",")
-		err := subtitles.Download(videoPath, apis, languages)
-		if err != nil {
-			utils.ExitPrintError(err, "Sadly, we could not download any subtitle for you. Try another time or contribute to the apis. See 'subify upload -h'")
+		// need to check if this is a directory and walk it checking for video files
+		//
+
+		mime.AddExtensionType(".mkv", "video/x-matroska")
+		mime.AddExtensionType(".mp4", "video/mp4")
+		mime.AddExtensionType(".avi", "video/avi")
+
+		// walk the path and gather files
+		var videoFiles []string
+		filepath.Walk(videoPath, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				log.Printf("Error in walking directory %s\n", err)
+				return nil
+			}
+
+			fileInfo, err := os.Stat(path)
+			if err != nil {
+				log.Printf("Error in opening path %s\n", path)
+				return nil
+			}
+
+			if fileInfo.IsDir() {
+				return nil
+			}
+
+			mimeType := mime.TypeByExtension(filepath.Ext(path))
+			if strings.Contains(mimeType, "video") {
+				videoFiles = append(videoFiles, path)
+			} else {
+				log.Printf("Ignoring %s (not a video file)\n", filepath.Base(path))
+			}
+
+			return nil
+		})
+
+		for _, p := range videoFiles {
+			log.Printf("Downloading subtitles for '%s'\n", p)
+			err := subtitles.Download(p, apis, languages)
+			if err != nil {
+				log.Printf("Error while downloading subtitle for '%s': %s\n", p, err)
+			}
 		}
 
 		if openVideo {
