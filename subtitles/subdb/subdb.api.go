@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
+	"os"
 	"path"
 
 	"github.com/matcornic/subify/subtitles/languages"
@@ -31,6 +33,14 @@ func New() API {
 
 // Download downloads the SubDB subtitle from a video
 func (s API) Download(videoPath string, language lang.Language) (subtitlePath string, err error) {
+	// Save the content to file
+	subtitlePath = videoPath[0:len(videoPath)-len(path.Ext(videoPath))] + ".srt"
+
+	if _, err := os.Stat(subtitlePath); err == nil || os.IsExist(err) {
+		log.Printf("Skipping since subtitle file already exists %s\n", subtitlePath)
+		return subtitlePath, nil
+	}
+
 	// Get unique hash to identify video
 	hash, err := getHashOfVideo(videoPath)
 	if err != nil {
@@ -44,9 +54,6 @@ func (s API) Download(videoPath string, language lang.Language) (subtitlePath st
 	if err != nil {
 		return "", err
 	}
-
-	// Save the content to file
-	subtitlePath = videoPath[0:len(videoPath)-len(path.Ext(videoPath))] + ".srt"
 
 	err = ioutil.WriteFile(subtitlePath, subtitle, 0644)
 	if err != nil {

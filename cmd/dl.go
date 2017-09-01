@@ -33,8 +33,6 @@ Give the path of your video as first parameter and let's go !`,
 
 		apis := strings.Split(viper.GetString("download.apis"), ",")
 		languages := strings.Split(viper.GetString("download.languages"), ",")
-		// need to check if this is a directory and walk it checking for video files
-		//
 
 		mime.AddExtensionType(".mkv", "video/x-matroska")
 		mime.AddExtensionType(".mp4", "video/mp4")
