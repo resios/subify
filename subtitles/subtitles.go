@@ -2,6 +2,9 @@ package subtitles
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"path"
 	"strconv"
 	"strings"
 
@@ -14,6 +17,14 @@ func Download(videoPath string, apiAliases []string, languages []string) error {
 	// APIs to download subtitles.
 	var subtitlePath string
 	var err error
+
+	// Check if subtitle is already present
+	subtitlePath = videoPath[0:len(videoPath)-len(path.Ext(videoPath))] + ".srt"
+
+	if _, err := os.Stat(subtitlePath); err == nil || os.IsExist(err) {
+		log.Printf("Skipping since subtitle file already exists %s\n", subtitlePath)
+		return nil
+	}
 
 	// Gets APIs
 	a := InitAPIs(apiAliases)

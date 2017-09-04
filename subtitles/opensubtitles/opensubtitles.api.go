@@ -2,8 +2,6 @@ package opensubtitles
 
 import (
 	"errors"
-	"log"
-	"os"
 	"path"
 
 	"github.com/matcornic/subify/subtitles/languages"
@@ -31,13 +29,7 @@ func New() API {
 
 // Download downloads the OpenSubtitles subtitle from a video
 func (s API) Download(videoPath string, language lang.Language) (subtitlePath string, err error) {
-	// Check if subtitle is already present
 	subtitlePath = videoPath[0:len(videoPath)-len(path.Ext(videoPath))] + ".srt"
-
-	if _, err := os.Stat(subtitlePath); err == nil || os.IsExist(err) {
-		log.Printf("Skipping since subtitle file already exists %s\n", subtitlePath)
-		return subtitlePath, nil
-	}
 
 	c, err := osdb.NewClient()
 	if err != nil {

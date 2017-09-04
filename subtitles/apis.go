@@ -4,6 +4,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/matcornic/subify/subtitles/addic7ed"
+
 	"github.com/matcornic/subify/subtitles/languages"
 	"github.com/matcornic/subify/subtitles/opensubtitles"
 	"github.com/matcornic/subify/subtitles/subdb"
@@ -24,6 +26,7 @@ type Clients []Client
 // DefaultAPIs represents the available APIs
 // Is also used as the default
 var DefaultAPIs = Clients{
+	addic7ed.New(),
 	subdb.New(),
 	opensubtitles.New(),
 }
